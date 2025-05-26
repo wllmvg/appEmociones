@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Test de Estado de Ánimo</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(5px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      body {
+        background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+        min-height: 100vh;
+        color: #fff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        margin: 0;
+        animation: fadeIn 0.3s ease;
+      }
+      .container {
+        max-width: 720px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 2rem 3rem;
+        margin-top: 2rem;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        animation: fadeIn 0.3s ease 0.1s forwards;
+        opacity: 0;
+      }
+      h1 {
+        margin-bottom: 30px;
+        text-align: center;
+        animation: fadeIn 0.3s ease 0.2s forwards;
+        opacity: 0;
+      }
+      #seccion-nombre {
+        width: 100%;
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 25px;
+        animation: fadeIn 0.3s ease 0.3s forwards;
+        opacity: 0;
+      }
+      #seccion-nombre input {
+        flex-grow: 1;
+        max-width: 300px;
+        font-size: 1.1rem;
+      }
+      #botones-inicio {
+        display: flex;
+        gap: 10px;
+      }
+      #btn-mostrar-historico {
+        background-color: #28a745;
+        border-color: #28a745;
+      }
+      .form-check-inline {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 10px;
+      }
+      .form-check-input {
+        width: 42px;
+        height: 42px;
+        cursor: pointer;
+        accent-color: #2575fc;
+        transition: transform 0.1s;
+      }
+      .form-check-input:checked {
+        transform: scale(1.2);
+      }
+      .form-check-label {
+        font-size: 1.25rem;
+        margin-left: 6px;
+        color: #fff;
+        user-select: none;
+      }
+      form div {
+        text-align: center;
+        margin-bottom: 0.5rem;
+      }
+      form > button[type='submit'] {
+        display: block;
+        margin: 1.5rem auto 0 auto;
+        font-size: 1.1rem;
+        padding: 0.6rem 2rem;
+        animation: fadeIn 0.3s ease 0.5s forwards;
+        opacity: 0;
+      }
+      #resultado-container {
+        text-align: center;
+        animation: fadeIn 0.3s ease 0.6s forwards;
+        opacity: 0;
+      }
+      #historico-container {
+        margin-top: 20px;
+        max-height: 200px;
+        overflow-y: auto;
+        animation: fadeIn 0.3s ease 0.7s forwards;
+        opacity: 0;
+      }
+      #resumen-ia {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.15);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        animation: fadeIn 0.3s ease 0.8s forwards;
+        opacity: 0;
+      }
+      #resumen-ia h5 {
+        margin-bottom: 10px;
+      }
+      footer {
+        margin-top: 30px;
+        color: #ccc;
+        font-size: 0.9rem;
+        animation: fadeIn 0.3s ease 0.9s forwards;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Test de Estado de Ánimo</h1>
+      <div id="seccion-nombre">
+        <input
+          id="nombre-input"
+          class="form-control"
+          placeholder="Ingresa tu nombre"
+        />
+        <div id="botones-inicio">
+          <button id="btn-iniciar-test" class="btn btn-primary" disabled>
+            Comenzar Test
+          </button>
+          <button id="btn-mostrar-historico" class="btn btn-success">
+            Mostrar Histórico
+          </button>
+        </div>
+      </div>
+      <form id="form-test" class="d-none" autocomplete="off">
+        <div id="preguntas-container"></div>
+        <button type="submit" class="btn btn-success" disabled>
+          Siguiente pregunta
+        </button>
+      </form>
+      <div id="resultado-container" class="d-none mt-4">
+        <p id="mensaje-resultado" class="fs-5"></p>
+        <blockquote id="frase-motivacional" class="fst-italic"></blockquote>
+        <button id="btn-reiniciar" class="btn btn-warning mt-3">
+          Reiniciar Test
+        </button>
+      </div>
+      <div
+        id="historico-container"
+        class="d-none mt-3"
+        style="overflow-y: auto; max-height: 200px"
+      >
+        <table class="table table-striped table-dark">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Fecha</th>
+              <th>Promedio</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-historico-body"></tbody>
+        </table>
+      </div>
+      <div id="resumen-ia">
+        <h5>Interacción con IA</h5>
+        <ul>
+          <li><strong>IA utilizada:</strong> ChatGPT (OpenAI)</li>
+          <li><strong>Intentos de prompt:</strong> 2 versiones</li>
+          <li>
+            <strong>Ajustes realizados:</strong> Simplificación del lenguaje y
+            especificación clara de la escala 1-5.
+          </li>
+        </ul>
+      </div>
+      <footer>William Felipe Melgarejo Vega - UDES</footer>
+    </div>
+    <script>
+      const nombreInput = document.getElementById('nombre-input');
+      const btnIniciarTest = document.getElementById('btn-iniciar-test');
+      const btnMostrarHistorico = document.getElementById(
+        'btn-mostrar-historico'
+      );
+      const seccionNombre = document.getElementById('seccion-nombre');
+      const formTest = document.getElementById('form-test');
+      const preguntasContainer = document.getElementById('preguntas-container');
+      const resultadoContainer = document.getElementById('resultado-container');
+      const mensajeResultado = document.getElementById('mensaje-resultado');
+      const fraseMotivacional = document.getElementById('frase-motivacional');
+      const btnReiniciar = document.getElementById('btn-reiniciar');
+      const historicoContainer = document.getElementById('historico-container');
+      const tablaHistoricoBody = document.getElementById(
+        'tabla-historico-body'
+      );
+      const resumenIA = document.getElementById('resumen-ia');
+
+      const preguntas = [
+        '¿Te has sentido triste o mal en los últimos días?',
+        '¿Te dan ganas de hacer tus cosas diarias?',
+        '¿Te has sentido nervioso o preocupado mucho?',
+        '¿Te cuesta trabajo prestar atención o concentrarte?',
+        '¿Tienes energía para hacer lo que necesitas cada día?',
+        '¿Estás contento con las personas que te rodean?',
+        '¿Has dormido bien últimamente?',
+        '¿Te has sentido enojado o molesto seguido?',
+        '¿Te sientes feliz o alegre durante el día?',
+        '¿Has cambiado la forma en que comes o tienes menos ganas de comer?',
+        '¿Te sientes seguro cuando tienes que decidir algo?',
+        '¿Has evitado salir o estar con otras personas?',
+        '¿Te ha dado ganas de no hacer nada o sentirte sin interés?',
+        '¿Te has sentido mal contigo mismo o culpable?',
+        '¿Tu ánimo ha estado calmado o tranquilo estos días?',
+        '¿Puedes contarle a alguien cómo te sientes?',
+        '¿Has pensado cosas negativas muchas veces?',
+        '¿Tienes ganas de hacer ejercicio o moverte?',
+        '¿Te sientes relajado o tranquilo a menudo?',
+        '¿Has estado más lento o más activo que de costumbre?',
+        '¿Te es fácil pedir ayuda cuando la necesitas?',
+        '¿Sientes que a veces no puedes controlar tus emociones?',
+        '¿Tus emociones te han dificultado hacer tu trabajo o estudiar?',
+        '¿Sientes que tienes amigos o familia que te apoyan?',
+        '¿Has dejado de disfrutar cosas que antes te gustaban?',
+        '¿Te sientes abrumado o con mucho trabajo?',
+        '¿Te recuperas rápido cuando te sientes mal?',
+        '¿Te sientes muy cansado sin razón clara?',
+        '¿Te sientes optimista o con ganas sobre el futuro?',
+        '¿Tienes momentos en que te sientes bien y tranquilo?',
+      ];
+
+      let indicePreguntaActual = 0;
+      let respuestas = [];
+
+      // Inicial: mostrar resumen IA
+      resumenIA.style.display = 'block';
+
+      nombreInput.addEventListener('input', () => {
+        btnIniciarTest.disabled = nombreInput.value.trim() === '';
+      });
+
+      btnIniciarTest.addEventListener('click', () => {
+        seccionNombre.classList.add('d-none');
+        resumenIA.style.display = 'none';
+        formTest.classList.remove('d-none');
+        indicePreguntaActual = 0;
+        respuestas = [];
+        mostrarPregunta(indicePreguntaActual);
+        habilitarBotonEnviar(false);
+      });
+
+      function mostrarPregunta(i) {
+        preguntasContainer.innerHTML = '';
+        const div = document.createElement('div');
+        div.className = 'mb-4';
+        div.innerHTML = `
+          <label class="form-label fw-bold">${i + 1}. ${preguntas[i]}</label>
+          <div>${[1, 2, 3, 4, 5]
+            .map(
+              (n) => `
+            <div class="form-check form-check-inline">
+              <input class="form-check-input" type="radio" name="respuesta" id="r${n}" value="${n}" required />
+              <label class="form-check-label" for="r${n}">${n}</label>
+            </div>`
+            )
+            .join('')}</div>
+          <small class="text-white-50">1 = Nunca, 5 = Siempre</small>
+        `;
+        preguntasContainer.appendChild(div);
+        document
+          .querySelectorAll('input[name="respuesta"]')
+          .forEach((r) =>
+            r.addEventListener('change', () => habilitarBotonEnviar(true))
+          );
+      }
+
+      formTest.addEventListener('submit', (e) => {
+        e.preventDefault();
+        respuestas.push(+formTest.respuesta.value);
+        habilitarBotonEnviar(false);
+        formTest.reset();
+        if (++indicePreguntaActual < preguntas.length) {
+          mostrarPregunta(indicePreguntaActual);
+          formTest.querySelector('button').textContent =
+            indicePreguntaActual === preguntas.length - 1
+              ? 'Finalizar Test'
+              : 'Siguiente pregunta';
+        } else mostrarResultado();
+      });
+
+      function habilitarBotonEnviar(activo) {
+        formTest.querySelector('button[type="submit"]').disabled = !activo;
+      }
+
+      function mostrarResultado() {
+        formTest.classList.add('d-none');
+        resultadoContainer.classList.remove('d-none');
+        const avg = respuestas.reduce((a, b) => a + b, 0) / respuestas.length;
+        let msg, fr;
+        if (avg >= 4) {
+          msg = `¡Hola, ${nombreInput.value}! Te ves muy bien animado hoy.`;
+          fr =
+            '“La felicidad no es algo hecho. Proviene de tus propias acciones.” 😊';
+        } else if (avg >= 3) {
+          msg = `Hola, ${nombreInput.value}. Estás bien, pero podrías mejorar.`;
+          fr =
+            '“No puedes detener las olas, pero puedes aprender a surfear.” 🌊';
+        } else {
+          msg = `Hola, ${nombreInput.value}. Parece que hoy no fue tu mejor día.`;
+          fr = '“Después de la tormenta, siempre llega la calma.” ⛈️';
+        }
+        mensajeResultado.textContent = msg + ` (Promedio: ${avg.toFixed(2)})`;
+        fraseMotivacional.textContent = fr;
+        guardarHistorico(nombreInput.value, avg.toFixed(2));
+      }
+
+      btnReiniciar.addEventListener('click', () => {
+        resultadoContainer.classList.add('d-none');
+        seccionNombre.classList.remove('d-none');
+        resumenIA.style.display = 'block';
+        btnIniciarTest.disabled = true;
+        nombreInput.value = '';
+        formTest.querySelector('button').textContent = 'Siguiente pregunta';
+      });
+
+      btnMostrarHistorico.addEventListener('click', () => {
+        if (historicoContainer.classList.contains('d-none')) {
+          cargarHistorico();
+          historicoContainer.classList.remove('d-none');
+          btnMostrarHistorico.textContent = 'Ocultar Histórico';
+        } else {
+          historicoContainer.classList.add('d-none');
+          btnMostrarHistorico.textContent = 'Mostrar Histórico';
+        }
+      });
+
+      function guardarHistorico(n, p) {
+        const data = JSON.parse(
+          localStorage.getItem('testEstadoAnimo') || '[]'
+        );
+        data.push({
+          nombre: n,
+          fecha: new Date().toLocaleString(),
+          promedio: p,
+        });
+        localStorage.setItem('testEstadoAnimo', JSON.stringify(data));
+      }
+      function cargarHistorico() {
+        const d = JSON.parse(localStorage.getItem('testEstadoAnimo') || '[]');
+        tablaHistoricoBody.innerHTML = '';
+        d.forEach((r) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${r.nombre}</td><td>${r.fecha}</td><td>${r.promedio}</td>`;
+          tablaHistoricoBody.appendChild(tr);
+        });
+      }
+    </script>
+  </body>
+</html>
